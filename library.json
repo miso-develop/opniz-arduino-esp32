@@ -1,0 +1,27 @@
+{
+  "name": "opniz-esp32",
+  "version": "0.1.0",
+  "description": "opniz Arduino library for ESP32",
+  "keywords": "Opniz,ESP32,M5Stack",
+  "license": "MIT",
+  "homepage": "https://github.com/miso-develop/opniz",
+  "repository": {
+    "type" : "git",
+    "url": "https://github.com/miso-develop/opniz-arduino-esp32.git"
+  },
+  "authors": {
+    "name": "Miso Tanaka",
+    "email": "miso.develop@gmail.com"
+  },
+  "framework": "arduino",
+  "platforms": "espressif32",
+  "dependencies": {
+    "bblanchon/ArduinoJson": "^6.17.3",
+    "links2004/WebSockets": "^2.3.6"
+  },
+  "export": {
+    "exclude": [
+      "extras"
+    ]
+  }
+}
