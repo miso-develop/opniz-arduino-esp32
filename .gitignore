@@ -5,7 +5,7 @@
 .vscode/ipch
 /*.log
 
-.vscode/
-temp/
-issue.md
+# [release]
+.temp
+.vscode
 src/main.cpp
