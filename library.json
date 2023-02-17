@@ -13,10 +13,14 @@
     "name": "Miso Tanaka",
     "email": "miso.develop@gmail.com"
   },
-  "framework": "arduino",
   "platforms": "espressif32",
+  "framework": "arduino",
+  "headers": [
+    "OpnizEsp32.h",
+    "lib/WiFiConnector.h"
+  ],
   "dependencies": {
-    "bblanchon/ArduinoJson": "^6.17.3",
+    "bblanchon/ArduinoJson": "^6.20.0",
     "links2004/WebSockets": "^2.3.6"
   },
   "export": {
