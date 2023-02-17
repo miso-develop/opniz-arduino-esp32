@@ -4,6 +4,7 @@
 .vscode/launch.json
 .vscode/ipch
 /*.log
+~$*
 
 # [release]
 .temp

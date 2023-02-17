@@ -4,29 +4,33 @@
 
 > ❗ このプロジェクトは現在アルファ版です。
 
-opnizとはM5StackといったESP32デバイスをNode.jsからobnizライクに遠隔制御するための、**Node.js SDK**および**Arduinoライブラリ**です。  
-しくみとしてはESP32デバイスおよびNode.js SDK間にて**JSON形式のRPCメッセージ**をやりとりし、相互に定義されたメソッドを呼び合います。  
+opnizとはM5StackといったESP32デバイスをNode.jsからobnizライクに遠隔制御するための、Node.js SDKおよびArduinoライブラリです。  
+しくみとしてはESP32デバイスおよびNode.js SDK間にてJSON形式のRPCメッセージをやりとりし、相互に定義されたメソッドを呼び合います。  
 
 ![overview](https://user-images.githubusercontent.com/22117028/150321859-5dde911d-91da-41f4-abee-3ad696905529.png)
 
-現在Node.js SDK、Arduinoライブラリともに**ESP32**および**M5ATOM**クラスを実装しています。  
-M5ATOMクラスで**M5Stack、M5StickC、M5ATOM Lite、M5ATOM Matrixでの動作を確認しています。**  
-
 新たなデバイスクラスや独自のメソッドを簡単に拡張できる設計となっています。  
-また**クラウド環境（PaaS、FaaS等）でも動作**させることができます。  
+またクラウド環境（PaaS、FaaS等）でも動作させることができます。  
 
 
 
 ## Arduinoライブラリ
 
-本リポジトリはESP32向けArduinoライブラリのリポジトリとなります。  
-Node.js SDKからのRPCリクエストを処理するハンドラと、ESP32デバイスからのRPCイベントを発火するエミッタを実装したデバイスクラスを提供します。  
-各M5デバイスクラスはこのクラスを継承し実装されます。  
+本リポジトリはESP32向けのopniz Arduinoライブラリ リポジトリとなります。  
+Node.js SDKからのRPCリクエストを処理するハンドラーと、ESP32デバイスからのRPCイベントを発火するエミッターを実装したデバイスクラスを提供します。  
 Arduino IDEおよびPlatformIOに対応しています。  
 
 
 
-## インストール方法
+## 対応デバイス
+
+* ESP32 デバイス
+* ESP32-PICO-D4 デバイス
+* ESP32-S3 デバイス
+
+
+
+## インストール
 
 opniz CLIを使用する方法と、Arduinoを使用する方法があります。  
 
@@ -52,7 +56,7 @@ opniz upload
 
 ### Arduinoでのインストール
 
-まだArduinoライブラリマネージャーにはリリースしていないため、GitHubリポジトリよりZIPをダウンロードのうえ、Arduino IDEにて「.ZIP形式のライブラリをインストール...」を選択しダウンロードしたZIPをライブラリへ追加してください。
+Arduinoライブラリマネージャーにはリリースしていないため、GitHubリポジトリよりZIPをダウンロードのうえ、Arduino IDEにて「.ZIP形式のライブラリをインストール...」を選択しダウンロードしたZIPをライブラリへ追加してください。
 
 #### GitHubリポジトリからのZIPダウンロード
 
@@ -68,7 +72,7 @@ Arduinoのメニューより「スケッチ」→「ライブラリをインク�
 
 #### 依存ライブラリのインストール
 
-`ArduinoJson`ライブラリと`WebSockets`ライブラリのインストールが別途必要となります。  
+[ArduinoJson](https://github.com/bblanchon/ArduinoJson)、[WebSockets](https://github.com/Links2004/arduinoWebSockets)ライブラリが別途必要となります。  
 
 
 
@@ -76,11 +80,10 @@ Arduinoのメニューより「スケッチ」→「ライブラリをインク�
 
 以下のコードは`Opniz::Esp32`クラスを使用した最小限のコードです。  
 Arduino IDEメニューの「スケッチ例」→「opniz」→「Basic」にあるコードと同等です。  
-（M5Stack、M5StickC、M5ATOMも以下のコードで動作します）  
 
 opnizインスタンスの生成、Wi-Fi接続、Node.js SDKへの接続、そして`loop`関数内の`opniz->loop()`にてNode.js SDKからのRPCリクエストの待ち受け・ハンドリングと、デバイスへ実装されているRPCイベントの発火を行っています。  
 
-基本的なI/O制御用ハンドラは実装済みのため、このコードをデバイスへ書き込むだけでNode.js SDKからさまざまな電子パーツが制御可能となります。  
+基本的なI/O制御用ハンドラーは実装済みのため、このコードをデバイスへ書き込むだけでNode.js SDKからさまざまな電子パーツが制御可能となります。  
 `ssid`、`password`をお使いのWi-Fiのものに、`address`、`port`をそれぞれNode.js SDKを実行する端末のものに書き換え、デバイスにスケッチを書き込んでみてください。  
 opniz Node.js SDKと連携可能になります。  
 
@@ -99,25 +102,31 @@ Opniz::Esp32* opniz = new Opniz::Esp32(address, port); // opnizインスタン�
 
 
 void setup() {
+    Serial.begin(115200);
+    
+    wifiConnector.setTimeoutCallback([]() { esp_restart(); }); // WiFi接続タイムアウト時にリブート
     wifiConnector.connect(); // WiFi接続
-    opniz->connect();        // Node.js SDKへ接続
+    
+    Serial.printf("opniz server address: %s\nopniz server port: %u\n\n", opniz->getAddress(), opniz->getPort()); // Node.js SDK接続情報を表示
+    opniz->connect(); // Node.js SDKへ接続
 }
 
 void loop() {
-    opniz->loop();         // opnizメインループ
+    opniz->loop(); // opnizメインループ
     wifiConnector.watch(); // WiFi接続監視
 }
 ```
 
-### ハンドラ、エミッタの拡張
+### ハンドラー、エミッターの拡張
 
 実装を追加して独自に拡張できます。  
-ハンドラやエミッタの追加は[`examples/AddHandler/AddHandler.ino`](./examples/AddHandler/AddHandler.ino)（以下のコード）が参考になると思います。  
+ハンドラーやエミッターの追加は[`examples/AddHandler/AddHandler.ino`](./examples/AddHandler/AddHandler.ino)（以下のコード）が参考になると思います。  
+このコードではEsp32クラスをもとにM5デバイスのボード情報取得ハンドラーとボタンイベントエミッターを拡張し追加しています。  
 
 ```cpp
 #include <OpnizEsp32.h>
 #include <lib/WiFiConnector.h>
-#include <M5Atom.h>
+#include <M5Unified.h>
 
 const char* ssid = "<SSID>";         // WiFiのSSIDに書き換え
 const char* password = "<PASSWORD>"; // WiFiのパスワードに書き換え
@@ -129,55 +138,48 @@ Opniz::Esp32* opniz = new Opniz::Esp32(address, port); // opnizインスタン�
 
 
 
-// StringをCRGBに変換する関数
-CRGB str2crgb(String color) { return strtoll(&color[1], NULL, 16) & 0xffffff; }
-
-// 独自ハンドラを作成
-class DrawpixHandler : public BaseHandler {
+// 独自ハンドラーを作成
+class GetBoardHandler : public BaseHandler {
 public:
-    String name() override { return "_M5.dis.drawpix(uint8_t,CRGB):void"; };
-    String procedure(JsonArray params) override {
-        uint8_t number = (uint8_t)params[0];
-        String color = params[1];
-        M5.dis.drawpix(number, str2crgb(color));
-        return "true";
+    String name() override { return "_M5.getBoard():board_t"; }; // Node.js側から受け取るRPC methodを指定
+    String procedure(JsonArray params) override { // nameメソッドと一致するRPCを受信したときに実行する処理を記述
+        return (String)M5.getBoard();
     }
 };
 
-// 独自エミッタを作成
+
+
+// 独自エミッターを作成
 class ButtonEmitter : public BaseEmitter {
 public:
-    boolean canEmit() override {
-        M5.Btn.read();
-        return M5.Btn.wasPressed();
+    boolean canEmit() override { // true/falseを返却する処理を記述
+        M5.update();
+        return M5.BtnA.wasClicked();
     };
-    String emit() override {
+    String emit() override { // canEmitの結果がtrueなら実行される
         std::vector<String> parameters;
-        parameters.emplace_back("singlePush");
-        return createRpcRequest("button", parameters);
+        parameters.emplace_back("BtnA"); // RPCリクエストのパラメーターを指定
+        return createRpcRequest("_M5.Btn.wasClicked(void):bool", parameters); // RPC methodを指定し、RPCリクエストを送信
     };
 };
 
 
 
 void setup() {
-    // M5ATOM初期化
-    M5.begin(true, false, true);
-    M5.dis.setBrightness(10);
+    M5.begin(); // M5デバイス初期化
     
-    // WiFi接続
-    wifiConnector.connect();
+    wifiConnector.setTimeoutCallback([]() { esp_restart(); }); // WiFi接続タイムアウト時にリブート
+    wifiConnector.connect(); // WiFi接続
     
-    // 独自ハンドラ/エミッタを登録
-    opniz->addHandler({ new DrawpixHandler });
-    opniz->addEmitter({ new ButtonEmitter });
+    opniz->addHandler({ new GetBoardHandler }); // 独自ハンドラーを登録
+    opniz->addEmitter({ new ButtonEmitter }); // 独自エミッターを登録
     
-    // Node.js SDKへ接続
-    opniz->connect();
+    Serial.printf("opniz server address: %s\nopniz server port: %u\n\n", opniz->getAddress(), opniz->getPort()); // Node.js SDK接続情報を表示
+    opniz->connect(); // Node.js SDKへ接続
 }
 
 void loop() {
-    opniz->loop();         // opnizメインループ
+    opniz->loop(); // opnizメインループ
     wifiConnector.watch(); // WiFi接続監視
 }
 ```
@@ -212,6 +214,8 @@ opniz Node.js SDKでは以下の通信プロトコルを実装しています。
 
 * [opniz SDK for Node.js](https://github.com/miso-develop/opniz-sdk-nodejs)
 	* opnizデバイスをNode.jsから遠隔制御するためのSDK
+* [opniz Arduino Library for M5Unified](https://github.com/miso-develop/opniz-arduino-m5unified)
+	* M5Unified向けArduinoライブラリ
 * [opniz Arduino Library for M5ATOM](https://github.com/miso-develop/opniz-arduino-m5atom)
 	* M5ATOM向けArduinoライブラリ
 * [opniz CLI](https://github.com/miso-develop/opniz-cli)

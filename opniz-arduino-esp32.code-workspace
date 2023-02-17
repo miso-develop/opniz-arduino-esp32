@@ -64,7 +64,9 @@
 			"random": "cpp",
 			"iostream": "cpp",
 			"esp32-hal-spi.h": "c",
-			"esp32-hal-adc.h": "c"
+			"esp32-hal-adc.h": "c",
+			"list": "cpp",
+			"thread": "cpp"
 		},
 		"workbench.colorCustomizations": {
 			"titleBar.activeBackground": "#00767b",
