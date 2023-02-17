@@ -1,6 +1,6 @@
 #include <OpnizEsp32.h>
 #include <lib/WiFiConnector.h>
-#include <M5Atom.h>
+#include <M5Unified.h>
 
 const char* ssid = "<SSID>";         // WiFiのSSIDに書き換え
 const char* password = "<PASSWORD>"; // WiFiのパスワードに書き換え
@@ -12,54 +12,47 @@ Opniz::Esp32* opniz = new Opniz::Esp32(address, port); // opnizインスタン�
 
 
 
-// StringをCRGBに変換する関数
-CRGB str2crgb(String color) { return strtoll(&color[1], NULL, 16) & 0xffffff; }
-
-// 独自ハンドラを作成
-class DrawpixHandler : public BaseHandler {
+// 独自ハンドラーを作成
+class GetBoardHandler : public BaseHandler {
 public:
-    String name() override { return "_M5.dis.drawpix(uint8_t,CRGB):void"; };
-    String procedure(JsonArray params) override {
-        uint8_t number = (uint8_t)params[0];
-        String color = params[1];
-        M5.dis.drawpix(number, str2crgb(color));
-        return "true";
+    String name() override { return "_M5.getBoard():board_t"; }; // Node.js側から受け取るRPC methodを指定
+    String procedure(JsonArray params) override { // nameメソッドと一致するRPCを受信したときに実行する処理を記述
+        return (String)M5.getBoard();
     }
 };
 
-// 独自エミッタを作成
+
+
+// 独自エミッターを作成
 class ButtonEmitter : public BaseEmitter {
 public:
-    boolean canEmit() override {
-        M5.Btn.read();
-        return M5.Btn.wasPressed();
+    boolean canEmit() override { // true/falseを返却する処理を記述
+        M5.update();
+        return M5.BtnA.wasClicked();
     };
-    String emit() override {
+    String emit() override { // canEmitの結果がtrueなら実行される
         std::vector<String> parameters;
-        parameters.emplace_back("singlePush");
-        return createRpcRequest("button", parameters);
+        parameters.emplace_back("1"); // RPCリクエストのパラメーターを指定
+        return createRpcRequest("_M5.Btn.wasClicked(void):bool", parameters); // RPC methodを指定し、RPCリクエストを送信
     };
 };
 
 
 
 void setup() {
-    // M5ATOM初期化
-    M5.begin(true, false, true);
-    M5.dis.setBrightness(10);
+    M5.begin(); // M5デバイス初期化
     
-    // WiFi接続
-    wifiConnector.connect();
+    wifiConnector.setTimeoutCallback([]() { esp_restart(); }); // WiFi接続タイムアウト時にリブート
+    wifiConnector.connect(); // WiFi接続
     
-    // 独自ハンドラ/エミッタを登録
-    opniz->addHandler({ new DrawpixHandler });
-    opniz->addEmitter({ new ButtonEmitter });
+    opniz->addHandler({ new GetBoardHandler }); // 独自ハンドラーを登録
+    opniz->addEmitter({ new ButtonEmitter }); // 独自エミッターを登録
     
-    // Node.js SDKへ接続
-    opniz->connect();
+    Serial.printf("opniz server address: %s\nopniz server port: %u\n\n", opniz->getAddress(), opniz->getPort()); // Node.js SDK接続情報を表示
+    opniz->connect(); // Node.js SDKへ接続
 }
 
 void loop() {
-    opniz->loop();         // opnizメインループ
+    opniz->loop(); // opnizメインループ
     wifiConnector.watch(); // WiFi接続監視
 }

@@ -12,11 +12,16 @@ Opniz::Esp32* opniz = new Opniz::Esp32(address, port); // opnizインスタン�
 
 
 void setup() {
+    Serial.begin(115200);
+    
+    wifiConnector.setTimeoutCallback([]() { esp_restart(); }); // WiFi接続タイムアウト時にリブート
     wifiConnector.connect(); // WiFi接続
-    opniz->connect();        // Node.js SDKへ接続
+    
+    Serial.printf("opniz server address: %s\nopniz server port: %u\n\n", opniz->getAddress(), opniz->getPort()); // Node.js SDK接続情報を表示
+    opniz->connect(); // Node.js SDKへ接続
 }
 
 void loop() {
-    opniz->loop();         // opnizメインループ
+    opniz->loop(); // opnizメインループ
     wifiConnector.watch(); // WiFi接続監視
 }
