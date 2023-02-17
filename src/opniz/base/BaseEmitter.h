@@ -1,5 +1,5 @@
-#ifndef BASE_EMITTER_H
-#define BASE_EMITTER_H
+#ifndef OPNIZ_BASE_EMITTER_H
+#define OPNIZ_BASE_EMITTER_H
 
 #include <vector>
 #include "./lib/JsonParser.h"
