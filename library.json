@@ -1,6 +1,6 @@
 {
   "name": "opniz-esp32",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "opniz Arduino library for ESP32",
   "keywords": "Opniz,ESP32,M5Stack",
   "license": "MIT",

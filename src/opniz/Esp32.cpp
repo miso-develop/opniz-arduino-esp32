@@ -41,7 +41,7 @@ void Opniz::Esp32::_constructor() {
 
 
 String Opniz::Esp32::_getVersion______String_Handler::procedure(JsonArray params) {
-    return "OpnizEsp32@0.4.0";
+    return "OpnizEsp32@0.4.1";
 }
 
 
