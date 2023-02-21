@@ -31,6 +31,7 @@ void Opniz::Esp32::_constructor() {
         new _pinMode___uint8_t_uint8_t___void_Handler,
         new _ledcSetup___uint8_t_uint32_t_uint8_t___uint32_t_Handler,
         new _ledcAttachPin___uint8_t_uint8_t___void_Handler,
+        new _ledcDetachPin___uint8_t___void_Handler,
     });
     
     addEmitter({
@@ -116,5 +117,11 @@ String Opniz::Esp32::_ledcAttachPin___uint8_t_uint8_t___void_Handler::procedure(
     uint8_t pin = (uint8_t)params[0];
     uint8_t chan = (uint8_t)params[1];
     ledcAttachPin(pin, chan);
+    return "true";
+}
+
+String Opniz::Esp32::_ledcDetachPin___uint8_t___void_Handler::procedure(JsonArray params) {
+    uint8_t pin = (uint8_t)params[0];
+    ledcDetachPin(pin);
     return "true";
 }

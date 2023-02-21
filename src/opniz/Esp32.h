@@ -32,6 +32,7 @@ namespace Opniz {
         class _pinMode___uint8_t_uint8_t___void_Handler : public BaseHandler { public: String name() override { return "_pinMode(uint8_t,uint8_t):void"; }; String procedure(JsonArray params) override; };
         class _ledcSetup___uint8_t_uint32_t_uint8_t___uint32_t_Handler : public BaseHandler { public: String name() override { return "_ledcSetup(uint8_t,uint32_t,uint8_t):uint32_t"; }; String procedure(JsonArray params) override; };
         class _ledcAttachPin___uint8_t_uint8_t___void_Handler : public BaseHandler { public: String name() override { return "_ledcAttachPin(uint8_t,uint8_t):void"; }; String procedure(JsonArray params) override; };
+        class _ledcDetachPin___uint8_t___void_Handler : public BaseHandler { public: String name() override { return "_ledcDetachPin(uint8_t):void"; }; String procedure(JsonArray params) override; };
     };
 }
 
